@@ -1,63 +1,85 @@
 # Marketplace Prototype - Infrastructure Stack
 
-This repository contains the orchestration logic for the Marketplace Prototype project. It manages the local development stack using Docker Compose.
+Этот репозиторий содержит конфигурацию для запуска всего проекта **Marketplace Prototype** "с нуля" с использованием Docker Compose. Проект представляет собой прототип маркетплейса с функционалом каталога, управления товарами, продавцами и историей изменений.
 
-## Prerequisites
+## 🏗 Архитектура стека
 
-- [Docker](https://www.docker.com/get-started) & [Docker Compose](https://docs.docker.com/compose/install/)
-- [Git](https://git-scm.com/)
+Стек состоит из следующих сервисов:
 
-## Getting Started
+- **Frontend**: Vue 3 + Vite + Tailwind CSS (Nginx в Docker)
+- **Backend**: FastAPI + SQLAlchemy 2.0 (Асинхронный драйвер `asyncpg`)
+- **Database**: PostgreSQL 16
+- **Storage**: MinIO (S3-совместимое хранилище для изображений товаров)
 
-To launch the entire stack (Backend, Frontend, Database, and S3 Storage), follow these steps:
+---
 
-### 1. Clone the Repositories
+## 🚀 Быстрый запуск "В один клик" (Рекомендуется)
 
-This project consists of three separate repositories. Ensure they are cloned into the same parent directory:
+Самый быстрый способ развернуть весь проект с нуля (клонирование, запуск контейнеров, миграции и сидирование базы данных) — выполнить эту команду в вашем терминале:
 
 ```bash
-# Clone the infrastructure stack (this repo)
-git clone <infra-repo-url> marketplace-stack
-
-# Clone the backend
-git clone <backend-repo-url> marketplace-backend
-
-# Clone the frontend
-git clone <frontend-repo-url> marketplace-frontend
+curl -fsSL https://raw.githubusercontent.com/karim3487/marketplace-stack/main/install.sh | bash
 ```
 
-### 2. Configure Environment
+_Скрипт автоматически создаст папку `marketplace-workspace`, скачает туда 3 необходимых репозитория (stack, backend, frontend), поднимет Docker-контейнеры и накатит тестовые данные._
 
-Copy the example environment file and adjust the values if necessary:
+---
+
+## 🛠 Ручной запуск (Альтернатива)
+
+Если вы предпочитаете контролировать процесс пошагово:
+
+1. Клонируйте репозитории в одну общую папку:
+
+```bash
+git clone <url-stack> marketplace-stack
+git clone <url-backend> marketplace-backend
+git clone <url-frontend> marketplace-frontend
+
+```
+
+2. Перейдите в стек и запустите контейнеры:
 
 ```bash
 cd marketplace-stack
-cp .env.example .env
+make setup
+make up
+
 ```
 
-### 3. Launch the Stack
-
-Run the following command to build and start all containers in detached mode:
+3. Настройте базу данных:
 
 ```bash
-docker compose up -d --build
+docker exec marketplace_backend uv run alembic upgrade head
+docker exec marketplace_backend uv run python scripts/create_admin.py
+docker exec marketplace_backend uv run python scripts/seed.py
 ```
 
-### 4. Verify the Services
+### 4. Доступ к сервисам
 
-| Service           | URL                                            | Description                       |
-| ----------------- | ---------------------------------------------- | --------------------------------- |
-| **Backend API**   | [http://localhost:8000](http://localhost:8000) | FastAPI Documentation / API       |
-| **Frontend UI**   | [http://localhost:5173](http://localhost:5173) | Vite/Vue 3 Application            |
-| **MinIO Console** | [http://localhost:9001](http://localhost:9001) | S3 Management UI (admin/changeme) |
-| **PostgreSQL**    | `localhost:5432`                               | Database Service                  |
+| Сервис            | URL                                                      | Описание                             |
+| ----------------- | -------------------------------------------------------- | ------------------------------------ |
+| **Frontend**      | [http://localhost:5173](http://localhost:5173)           | Пользовательский интерфейс и Админка |
+| **Backend API**   | [http://localhost:8000/docs](http://localhost:8000/docs) | Swagger документация API             |
+| **MinIO Console** | [http://localhost:9001](http://localhost:9001)           | Управление S3 (admin / changeme)     |
 
-## Key Features
+---
 
-- **Healthchecks**: The backend service automatically waits for PostgreSQL and MinIO to be `healthy` before starting.
-- **Persistence**: Database data and S3 objects are persisted in the `./volumes` directory.
-- **Strictly Async**: Designed for the asynchronous Python backend (FastAPI + SQLAlchemy 2.0).
+## 🛠 Команды управления (Makefile)
 
-## AI Logs
+В папке `marketplace-stack` доступен Makefile для удобного управления:
 
-Development logs and technical decisions are stored in `docs/ai/`.
+- `make up` — запустить весь стек в фоне.
+- `make down` — остановить все сервисы.
+- `make logs` — просмотр логов всех сервисов.
+- `make up-infra` — запустить только Postgres и MinIO (полезно для локальной разработки бэкенда вне Docker).
+- `make clean` — остановить проект и **полностью удалить** все данные (volumes).
+
+---
+
+## 📂 Структура данных
+
+- `./volumes/pg_data` — данные PostgreSQL.
+- `./volumes/minio_data` — файлы в MinIO.
+- `../marketplace-backend` — исходный код бэкенда.
+- `../marketplace-frontend` — исходный код фронтенда.
