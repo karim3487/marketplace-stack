@@ -42,7 +42,7 @@ make setup || true
 make up
 # 5. Ожидание БД и накатывание данных
 echo -e "${YELLOW}⏳ Ожидание готовности API (может занять до 30 секунд)...${NC}"
-until $(curl --output /dev/null --silent --head --fail http://localhost:8000/health); do
+until $(curl --output /dev/null --silent --fail http://localhost:8000/health); do
     printf '.'
     sleep 2
 done
