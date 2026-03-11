@@ -49,9 +49,9 @@ done
 echo -e " ${GREEN}Готово!${NC}"
 
 echo -e "${BLUE}🗄 Накатываем миграции и тестовые данные...${NC}"
-docker exec marketplace_backend uv run alembic upgrade head
-docker exec marketplace_backend uv run python scripts/create_admin.py
-docker exec marketplace_backend uv run python scripts/seed.py
+docker exec marketplace_backend alembic upgrade head
+docker exec marketplace_backend python scripts/create_admin.py
+docker exec marketplace_backend python scripts/seed.py
 
 echo -e "\n${GREEN}====================================================${NC}"
 echo -e "${GREEN}🎉 Установка успешно завершена! Проект запущен.${NC}"
