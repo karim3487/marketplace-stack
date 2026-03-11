@@ -35,16 +35,20 @@ echo -e "${GREEN}✅ Репозитории загружены.${NC}\n"
 # 4. Запуск проекта
 echo -e "${BLUE}🐳 Поднимаем Docker контейнеры...${NC}"
 cd marketplace-stack
-make setup || true # игнорируем ошибку, если .env уже есть
-make up
 
+# Создаем .env из примера
+make setup || true
+
+make up
 # 5. Ожидание БД и накатывание данных
-# Ждем пару секунд, чтобы Postgres успел запуститься перед миграциями
-echo -e "${YELLOW}⏳ Ожидание инициализации базы данных (10 секунд)...${NC}"
-sleep 10
+echo -e "${YELLOW}⏳ Ожидание готовности API (может занять до 30 секунд)...${NC}"
+until $(curl --output /dev/null --silent --head --fail http://localhost:8000/health); do
+    printf '.'
+    sleep 2
+done
+echo -e " ${GREEN}Готово!${NC}"
 
 echo -e "${BLUE}🗄 Накатываем миграции и тестовые данные...${NC}"
-# УБРАНЫ флаги -it !
 docker exec marketplace_backend uv run alembic upgrade head
 docker exec marketplace_backend uv run python scripts/create_admin.py
 docker exec marketplace_backend uv run python scripts/seed.py
