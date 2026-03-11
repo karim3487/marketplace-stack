@@ -1,0 +1,13 @@
+# Docker volumes
+volumes/
+
+# Environment variables
+.env
+.env.local
+
+# Local service secrets
+auth.json
+
+# OS files
+.DS_Store
+Thumbs.db
