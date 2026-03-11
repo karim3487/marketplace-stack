@@ -32,9 +32,9 @@ _Скрипт автоматически создаст папку `marketplace-
 1. Клонируйте репозитории в одну общую папку:
 
 ```bash
-git clone <url-stack> marketplace-stack
-git clone <url-backend> marketplace-backend
-git clone <url-frontend> marketplace-frontend
+git clone https://github.com/karim3487/marketplace-stack.git marketplace-stack
+git clone https://github.com/karim3487/marketplace-backend.git marketplace-backend
+git clone https://github.com/karim3487/marketplace-frontend.git marketplace-frontend
 
 ```
 
