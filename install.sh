@@ -8,6 +8,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}🚀 Начинаем установку Marketplace Prototype...${NC}\n"
@@ -21,16 +22,22 @@ echo -e "${GREEN}✅ Все зависимости установлены.${NC}\
 
 # 2. Создание рабочей директории
 PROJECT_DIR="marketplace-workspace"
-echo -e "${BLUE}📂 Создаем папку ${PROJECT_DIR}...${NC}"
+if [ -d "$PROJECT_DIR" ]; then
+    echo -e "${YELLOW}⚠️  Папка ${PROJECT_DIR} уже существует. Очищаем старые контейнеры и данные для чистой установки...${NC}"
+    cd "$PROJECT_DIR/marketplace-stack" && docker compose down -v 2>/dev/null || true
+    cd ../..
+fi
+
+echo -e "${BLUE}📂 Подготовка папки ${PROJECT_DIR}...${NC}"
 mkdir -p "$PROJECT_DIR"
 cd "$PROJECT_DIR"
 
 # 3. Клонирование репозиториев (ЗАМЕНИТЕ ССЫЛКИ НА СВОИ)
 echo -e "${BLUE}📦 Клонируем репозитории...${NC}"
-git clone https://github.com/karim3487/marketplace-stack.git || echo "Stack уже склонирован"
-git clone https://github.com/karim3487/marketplace-backend.git || echo "Backend уже склонирован"
-git clone https://github.com/karim3487/marketplace-frontend.git || echo "Frontend уже склонирован"
-echo -e "${GREEN}✅ Репозитории загружены.${NC}\n"
+git clone https://github.com/karim3487/marketplace-stack.git || (cd marketplace-stack && git pull)
+git clone https://github.com/karim3487/marketplace-backend.git || (cd marketplace-backend && git pull)
+git clone https://github.com/karim3487/marketplace-frontend.git || (cd marketplace-frontend && git pull)
+echo -e "${GREEN}✅ Репозитории обновлены.${NC}\n"
 
 # 4. Запуск проекта
 echo -e "${BLUE}🐳 Поднимаем Docker контейнеры...${NC}"
@@ -56,8 +63,18 @@ docker exec marketplace_backend python scripts/seed.py
 echo -e "\n${GREEN}====================================================${NC}"
 echo -e "${GREEN}🎉 Установка успешно завершена! Проект запущен.${NC}"
 echo -e "${GREEN}====================================================${NC}"
-echo -e "🔗 Frontend:      http://localhost:5173"
-echo -e "🔗 Backend API:   http://localhost:8000/docs"
-echo -e "🔗 MinIO Console: http://localhost:9001 (admin / changeme)"
+echo -e ""
+echo -e "${BOLD}🔗 ДОСТУП К СЕРВИСАМ:${NC}"
+echo -e "  - Frontend:      ${BLUE}http://localhost:5173${NC}"
+echo -e "  - Admin Panel:   ${BLUE}http://localhost:5173/admin/login${NC}"
+echo -e "  - API Docs:      ${BLUE}http://localhost:8000/docs${NC}"
+echo -e "  - MinIO Console: ${BLUE}http://localhost:9001${NC}"
+echo -e ""
+echo -e "${BOLD}🔐 ДАННЫЕ ДЛЯ ВХОДА В АДМИНКУ:${NC}"
+echo -e "  - Логин:  ${GREEN}admin${NC}"
+echo -e "  - Пароль: ${GREEN}admin_password${NC}"
+echo -e ""
 echo -e "===================================================="
-echo -e "Чтобы остановить проект, перейдите в папку ${PROJECT_DIR}/marketplace-stack и выполните 'make down'"
+echo -e "Чтобы остановить проект, перейдите в папку:"
+echo -e "${BLUE}${PROJECT_DIR}/marketplace-stack${NC} и выполните '${YELLOW}make down${NC}'"
+echo -e "===================================================="
