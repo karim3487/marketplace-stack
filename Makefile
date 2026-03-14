@@ -23,7 +23,7 @@ setup:
 
 # Запуск всего стека
 up:
-	docker compose up -d
+	docker compose up -d --build
 
 # Запуск только базы данных и хранилища (идеально для разработки бэкенда)
 up-infra:
